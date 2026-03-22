@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Peak Performance Physio — Glasgow | Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #0a0a0a;
+  --surface: #111113;
+  --surface-hover: #19191d;
+  --border: #1e1e24;
+  --accent: #00D4FF;
+  --accent-dim: rgba(0, 212, 255, 0.12);
+  --accent-glow: rgba(0, 212, 255, 0.25);
+  --text: #f0f0f2;
+  --text-secondary: #8b8b96;
+  --green: #34d399;
+  --green-bg: rgba(52, 211, 153, 0.1);
+  --red: #f87171;
+  --red-bg: rgba(248, 113, 113, 0.08);
+  --amber: #fbbf24;
+  --amber-bg: rgba(251, 191, 36, 0.08);
+}
+
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.dashboard {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.clinic-name {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.clinic-name span {
+  color: var(--accent);
+}
+
+.live-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(52, 211, 153, 0.1);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.live-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(52,211,153,0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(52,211,153,0); }
+}
+
+.header-right {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* ── Hero Metric Cards ── */
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.hero-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.hero-card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+.hero-card:hover::before { opacity: 1; }
+
+.hero-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.hero-value {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+
+.hero-change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green);
+  background: var(--green-bg);
+  padding: 2px 10px;
+  border-radius: 8px;
+}
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 28px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 20px;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.tab-btn:hover { color: var(--text); }
+
+.tab-btn.active {
+  color: var(--accent);
+}
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0; right: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Tab Content ── */
+.tab-content {
+  display: none;
+  animation: fadeIn 0.35s ease;
+}
+
+.tab-content.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Grid Layouts ── */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* ── Cards ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: #2a2a32;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 16px;
+}
+
+.card-full { grid-column: 1 / -1; }
+
+/* ── Alert Cards ── */
+.alert {
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  line-height: 1.6;
+}
+
+.alert-red {
+  background: var(--red-bg);
+  border: 1px solid rgba(248, 113, 113, 0.18);
+  color: var(--red);
+}
+
+.alert-amber {
+  background: var(--amber-bg);
+  border: 1px solid rgba(251, 191, 36, 0.18);
+  color: var(--amber);
+}
+
+.alert-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.alert-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.alert-text strong {
+  font-weight: 700;
+}
+
+/* ── Stat Inline ── */
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-row:last-child { border-bottom: none; }
+
+.stat-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ── Mini Stat Cards ── */
+.mini-stat {
+  text-align: center;
+  padding: 20px;
+}
+
+.mini-stat .value {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.mini-stat .label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ── Review Cards ── */
+.review-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  transition: all 0.3s ease;
+}
+
+.review-card:hover {
+  border-color: #2a2a32;
+}
+
+.review-stars {
+  color: #fbbf24;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.review-text {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 10px;
+  font-style: italic;
+}
+
+.review-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* ── Top Treatments List ── */
+.treatment-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.treatment-item:last-child { border-bottom: none; }
+
+.treatment-rank {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.treatment-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.treatment-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* ── Heatmap ── */
+.heatmap {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.heatmap-cell {
+  aspect-ratio: 1.6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  gap: 4px;
+  transition: transform 0.2s;
+}
+
+.heatmap-cell:hover { transform: scale(1.05); }
+
+.heatmap-cell .day { font-size: 11px; opacity: 0.8; }
+.heatmap-cell .count { font-size: 18px; font-weight: 800; }
+
+/* ── Progress Bar ── */
+.progress-bar-wrap {
+  background: #1a1a22;
+  border-radius: 8px;
+  height: 10px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--accent), #00a8cc);
+  transition: width 1.2s ease;
+}
+
+/* ── Big Star Rating ── */
+.big-rating {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.big-rating .number {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.big-rating .out-of {
+  font-size: 18px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.big-stars {
+  font-size: 28px;
+  color: #fbbf24;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+}
+
+/* ── Lead Comparison ── */
+.comparison {
+  display: flex;
+  gap: 20px;
+  align-items: stretch;
+  margin-top: 12px;
+}
+
+.comparison-item {
+  flex: 1;
+  text-align: center;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.comparison-item.current {
+  background: var(--amber-bg);
+  border: 1px solid rgba(251,191,36,0.18);
+}
+
+.comparison-item.target {
+  background: var(--green-bg);
+  border: 1px solid rgba(52,211,153,0.2);
+}
+
+.comparison-item .comp-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.comparison-item.current .comp-label { color: var(--amber); }
+.comparison-item.target .comp-label { color: var(--green); }
+
+.comparison-item .comp-value {
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.comparison-item.current .comp-value { color: var(--amber); }
+.comparison-item.target .comp-value { color: var(--green); }
+
+/* ── GP / Club List ── */
+.referral-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.referral-item:last-child { border-bottom: none; }
+
+.referral-name {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.referral-count {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--accent-dim);
+  padding: 2px 12px;
+  border-radius: 8px;
+}
+
+/* ── Chart canvas ── */
+.chart-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.chart-wrap.line { height: 260px; }
+.chart-wrap.donut { height: 240px; }
+.chart-wrap.bar { height: 280px; }
+.chart-wrap.hbar { height: 340px; }
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 32px 0 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer a:hover { text-decoration: underline; }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .hero-grid { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .dashboard { padding: 16px 14px 40px; }
+  .hero-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .grid-2 { grid-template-columns: 1fr; }
+  .hero-value { font-size: 26px; }
+  .hero-card { padding: 16px 18px; }
+  .clinic-name { font-size: 17px; }
+  .heatmap { gap: 4px; }
+  .heatmap-cell .count { font-size: 14px; }
+  .comparison { flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .tab-btn { padding: 10px 14px; font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<div class="dashboard">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="clinic-name"><span>Peak Performance</span> Physio — Glasgow</div>
+      <div class="live-badge"><div class="live-dot"></div>Live</div>
+    </div>
+    <div class="header-right">Last updated: Today 09:34</div>
+  </div>
+
+  <!-- Hero Cards -->
+  <div class="hero-grid">
+    <div class="hero-card">
+      <div class="hero-label">Total Revenue This Month</div>
+      <div class="hero-value">£18,420</div>
+      <div class="hero-change">↑ 12% vs last month</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">Total Appointments</div>
+      <div class="hero-value">287</div>
+      <div class="hero-change">↑ 8% vs last month</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">New Patients</div>
+      <div class="hero-value">43</div>
+      <div class="hero-change">↑ 15% vs last month</div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-label">No-Show Rate</div>
+      <div class="hero-value">14%</div>
+      <div class="hero-change">↓ from 18% last month</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="overview">Overview</button>
+    <button class="tab-btn" data-tab="appointments">Appointments</button>
+    <button class="tab-btn" data-tab="patients">Patients</button>
+    <button class="tab-btn" data-tab="treatments">Treatments</button>
+    <button class="tab-btn" data-tab="reviews">Reviews</button>
+    <button class="tab-btn" data-tab="leads">Leads</button>
+  </div>
+
+  <!-- ═══════════════ TAB: OVERVIEW ═══════════════ -->
+  <div class="tab-content active" id="tab-overview">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Revenue Trend (6 Months)</div>
+        <div class="chart-wrap line"><canvas id="overviewRevenue"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Appointment Outcomes</div>
+        <div class="chart-wrap donut"><canvas id="overviewDonut"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Patient Sources</div>
+        <div class="chart-wrap bar"><canvas id="overviewSources"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Treatments This Month</div>
+        <div class="treatment-item"><div class="treatment-rank">1</div><div class="treatment-name">Lower Back Pain</div><div class="treatment-count">67 sessions</div></div>
+        <div class="treatment-item"><div class="treatment-rank">2</div><div class="treatment-name">Knee Injury</div><div class="treatment-count">54 sessions</div></div>
+        <div class="treatment-item"><div class="treatment-rank">3</div><div class="treatment-name">Sports Rehab</div><div class="treatment-count">48 sessions</div></div>
+      </div>
+    </div>
+    <div class="alert alert-red">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-text"><strong>No-show impact:</strong> 28 missed appointments this month = estimated £1,820 lost revenue. Automated reminders could recover up to 60% of this.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB: APPOINTMENTS ═══════════════ -->
+  <div class="tab-content" id="tab-appointments">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Weekly Show / No-Show / Cancelled</div>
+        <div class="chart-wrap bar"><canvas id="apptWeekly"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Busiest Days</div>
+        <div class="heatmap" id="heatmap"></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Busiest Times (8am – 6pm)</div>
+        <div class="chart-wrap bar"><canvas id="apptTimes"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Cancellation Reasons</div>
+        <div class="chart-wrap donut"><canvas id="apptCancelReasons"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card mini-stat"><div class="value">4.2</div><div class="label">Avg Appointments per Patient</div></div>
+      <div class="card mini-stat"><div class="value">68%</div><div class="label">Rebooking Rate</div></div>
+      <div class="card mini-stat"><div class="value">287</div><div class="label">Total Appointments</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB: PATIENTS ═══════════════ -->
+  <div class="tab-content" id="tab-patients">
+    <div class="grid-3">
+      <div class="card mini-stat"><div class="value" style="color:var(--accent);">43</div><div class="label">New Patients</div></div>
+      <div class="card mini-stat"><div class="value">244</div><div class="label">Returning Patients</div></div>
+      <div class="card mini-stat"><div class="value" style="color:var(--green);">74%</div><div class="label">Retention Rate</div></div>
+    </div>
+    <div class="alert alert-amber">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-text"><strong>18 patients</strong> haven't booked in 60+ days. A re-engagement campaign could recover an estimated <strong>£2,340</strong> in revenue.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Patient Acquisition Sources</div>
+        <div class="chart-wrap bar"><canvas id="patientSources"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Top Referring GPs</div>
+        <div class="referral-item"><div class="referral-name">🩺 Dr Sarah Mitchell</div><div class="referral-count">8 referrals</div></div>
+        <div class="referral-item"><div class="referral-name">🩺 Dr James Reid</div><div class="referral-count">6 referrals</div></div>
+        <div class="referral-item"><div class="referral-name">🩺 Dr Anna Campbell</div><div class="referral-count">4 referrals</div></div>
+        <div style="height:20px"></div>
+        <div class="card-title">Top Referring Sports Clubs</div>
+        <div class="referral-item"><div class="referral-name">🏉 Glasgow Warriors</div><div class="referral-count">5 referrals</div></div>
+        <div class="referral-item"><div class="referral-name">⚽ Partick Thistle FC</div><div class="referral-count">3 referrals</div></div>
+        <div class="referral-item"><div class="referral-name">🏊 Glasgow Triathlon Club</div><div class="referral-count">2 referrals</div></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card mini-stat"><div class="value">£312</div><div class="label">Avg Patient Lifetime Value</div></div>
+      <div class="card mini-stat"><div class="value">287</div><div class="label">Total Appointments</div></div>
+      <div class="card mini-stat"><div class="value">18</div><div class="label" style="color:var(--amber);">Lapsed Patients (60+ Days)</div></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB: TREATMENTS ═══════════════ -->
+  <div class="tab-content" id="tab-treatments">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Top Injury Types</div>
+        <div class="chart-wrap hbar"><canvas id="treatInjuries"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Sport vs Non-Sport Split</div>
+        <div class="chart-wrap donut"><canvas id="treatSportSplit"></canvas></div>
+        <div style="margin-top:24px;">
+          <div class="card-title">Avg Sessions per Injury Type</div>
+          <div class="stat-row"><div class="stat-label">Lower Back Pain</div><div class="stat-value">5.2</div></div>
+          <div class="stat-row"><div class="stat-label">Knee Injury</div><div class="stat-value">6.8</div></div>
+          <div class="stat-row"><div class="stat-label">Sports Rehab</div><div class="stat-value">8.1</div></div>
+          <div class="stat-row"><div class="stat-label">Shoulder Pain</div><div class="stat-value">4.9</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Revenue by Treatment Type</div>
+        <div class="chart-wrap bar"><canvas id="treatRevenue"></canvas></div>
+      </div>
+      <div class="card mini-stat" style="display:flex;flex-direction:column;justify-content:center;">
+        <div class="card-title" style="text-align:center;">Most Improved This Month</div>
+        <div class="value" style="font-size:42px;font-weight:800;text-align:center;color:var(--green);">+34%</div>
+        <div class="label" style="font-size:16px;text-align:center;color:var(--text-secondary);margin-top:6px;">Sports Rehab Volume</div>
+        <div class="label" style="font-size:13px;text-align:center;color:var(--text-secondary);margin-top:2px;">vs Last Month</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB: REVIEWS ═══════════════ -->
+  <div class="tab-content" id="tab-reviews">
+    <div class="grid-2">
+      <div class="card">
+        <div class="big-rating"><div class="number">4.8</div><div class="out-of">/ 5</div></div>
+        <div class="big-stars">★★★★★</div>
+        <div class="stat-row"><div class="stat-label">Total Reviews</div><div class="stat-value">47</div></div>
+        <div class="stat-row"><div class="stat-label">Reviews This Month</div><div class="stat-value">8</div></div>
+        <div class="stat-row"><div class="stat-label">Monthly Target</div><div class="stat-value">10</div></div>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:0%" id="reviewProgress"></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Review Trend (6 Months)</div>
+        <div class="chart-wrap line"><canvas id="reviewTrend"></canvas></div>
+      </div>
+    </div>
+    <div class="grid-3" style="margin-top:16px;">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">"Absolutely fantastic care from the whole team. My knee injury has improved dramatically after just 4 sessions. Couldn't recommend highly enough."</div>
+        <div class="review-date">2 days ago</div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <div class="review-text">"Professional, knowledgeable and genuinely caring. Sorted my lower back pain after months of suffering. Thank you so much."</div>
+        <div class="review-date">5 days ago</div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★☆</div>
+        <div class="review-text">"Really happy with the treatment and the results. Would have given 5 stars but parking can be tricky. Will definitely be back."</div>
+        <div class="review-date">1 week ago</div>
+      </div>
+    </div>
+    <div class="alert alert-amber" style="margin-top:16px;">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-text"><strong>Review collection is manual.</strong> Automating review requests after each appointment could generate 3x more reviews per month.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TAB: LEADS ═══════════════ -->
+  <div class="tab-content" id="tab-leads">
+    <div class="grid-3">
+      <div class="card mini-stat"><div class="value" style="color:var(--accent);">64</div><div class="label">Total Enquiries</div></div>
+      <div class="card mini-stat"><div class="value" style="color:var(--green);">48</div><div class="label">Converted to Bookings (75%)</div></div>
+      <div class="card mini-stat"><div class="value" style="color:var(--amber);">2h 40m</div><div class="label">Avg Response Time</div></div>
+    </div>
+    <div class="alert alert-red">
+      <div class="alert-icon">⚠</div>
+      <div class="alert-text"><strong>Average response time is 2hrs 40mins.</strong> Enquiries responded to within 5 minutes are 21x more likely to convert. A Speed to Lead Agent could bring this to under 60 seconds.</div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Enquiries by Source</div>
+        <div class="chart-wrap bar"><canvas id="leadSources"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Enquiries by Time of Day</div>
+        <div class="chart-wrap bar"><canvas id="leadTimes"></canvas></div>
+        <div style="margin-top:12px;text-align:center;font-size:13px;color:var(--amber);font-weight:600;">34% of enquiries arrive outside business hours</div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Lead Response Time Comparison</div>
+        <div class="comparison">
+          <div class="comparison-item current">
+            <div class="comp-label">Current Average</div>
+            <div class="comp-value">2h 40m</div>
+          </div>
+          <div class="comparison-item target">
+            <div class="comp-label">Industry Best Practice</div>
+            <div class="comp-value">5 min</div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat-row"><div class="stat-label">Unconverted Leads</div><div class="stat-value" style="color:var(--red);">16</div></div>
+        <div class="stat-row"><div class="stat-label">Estimated Lost Revenue</div><div class="stat-value" style="color:var(--red);">£1,040</div></div>
+        <div class="stat-row"><div class="stat-label">Conversion Rate</div><div class="stat-value" style="color:var(--green);">75%</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">Powered by <a href="https://getmacai.app" target="_blank" rel="noopener">Mac AI</a></div>
+
+</div>
+
+<script>
+// ── Globals ──
+Chart.defaults.color = '#8b8b96';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.plugins.legend.display = false;
+Chart.defaults.plugins.tooltip.backgroundColor = '#1a1a22';
+Chart.defaults.plugins.tooltip.titleColor = '#f0f0f2';
+Chart.defaults.plugins.tooltip.bodyColor = '#f0f0f2';
+Chart.defaults.plugins.tooltip.borderColor = '#2a2a32';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.cornerRadius = 10;
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.displayColors = false;
+Chart.defaults.scale.grid = { color: 'rgba(255,255,255,0.04)', drawBorder: false };
+Chart.defaults.scale.border = { display: false };
+
+const ACCENT = '#00D4FF';
+const ACCENT2 = '#0098b8';
+const ACCENT3 = '#006a82';
+const GREEN = '#34d399';
+const RED = '#f87171';
+const AMBER = '#fbbf24';
+
+function gradient(ctx, c1, c2) {
+  const g = ctx.createLinearGradient(0, 0, 0, 280);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  return g;
+}
+
+// ── Tabs ──
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('tab-' + btn.dataset.tab);
+    panel.classList.add('active');
+    panel.style.animation = 'none';
+    panel.offsetHeight;
+    panel.style.animation = '';
+    initChartsForTab(btn.dataset.tab);
+  });
+});
+
+// ── Chart Instances Store ──
+const charts = {};
+
+function initChartsForTab(tab) {
+  if (charts[tab]) return;
+  charts[tab] = true;
+  switch(tab) {
+    case 'overview': initOverview(); break;
+    case 'appointments': initAppointments(); break;
+    case 'patients': initPatients(); break;
+    case 'treatments': initTreatments(); break;
+    case 'reviews': initReviews(); break;
+    case 'leads': initLeads(); break;
+  }
+}
+
+// ── OVERVIEW ──
+function initOverview() {
+  // Revenue trend
+  const ctx1 = document.getElementById('overviewRevenue').getContext('2d');
+  new Chart(ctx1, {
+    type: 'line',
+    data: {
+      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+      datasets: [{
+        data: [12400, 13800, 14200, 15900, 16800, 18420],
+        borderColor: ACCENT,
+        backgroundColor: gradient(ctx1, 'rgba(0,212,255,0.15)', 'rgba(0,212,255,0)'),
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: ACCENT,
+        pointBorderColor: '#0a0a0a',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: { label: c => '£' + c.parsed.y.toLocaleString() }
+        }
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => '£' + (v/1000) + 'k' },
+          beginAtZero: false
+        }
+      }
+    }
+  });
+
+  // Donut
+  new Chart(document.getElementById('overviewDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Attended', 'No-show', 'Cancelled'],
+      datasets: [{
+        data: [247, 28, 12],
+        backgroundColor: [ACCENT, RED, '#3a3a44'],
+        borderWidth: 0,
+        hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
+      }
+    }
+  });
+
+  // Patient sources — horizontal bars
+  new Chart(document.getElementById('overviewSources'), {
+    type: 'bar',
+    data: {
+      labels: ['Google Search', 'Referral', 'Returning', 'Social Media', 'Walk-in'],
+      datasets: [{
+        data: [38, 28, 22, 8, 4],
+        backgroundColor: [ACCENT, ACCENT2, ACCENT3, '#005566', '#003844'],
+        borderRadius: 8,
+        borderSkipped: false,
+        barPercentage: 0.6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
+      },
+      scales: {
+        x: { ticks: { callback: v => v + '%' } }
+      }
+    }
+  });
+}
+
+// ── APPOINTMENTS ──
+function initAppointments() {
+  // Weekly stacked bar
+  new Chart(document.getElementById('apptWeekly'), {
+    type: 'bar',
+    data: {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      datasets: [
+        { label: 'Attended', data: [58, 64, 62, 63], backgroundColor: ACCENT, borderRadius: 6, borderSkipped: false },
+        { label: 'No-show', data: [8, 6, 7, 7], backgroundColor: RED, borderRadius: 6, borderSkipped: false },
+        { label: 'Cancelled', data: [4, 2, 3, 3], backgroundColor: '#3a3a44', borderRadius: 6, borderSkipped: false }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
+      },
+      scales: { x: { stacked: true }, y: { stacked: true } }
+    }
+  });
+
+  // Heatmap
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const counts = [45, 92, 78, 88, 52, 35, 12];
+  const maxC = Math.max(...counts);
+  const hm = document.getElementById('heatmap');
+  hm.innerHTML = '';
+  days.forEach((d, i) => {
+    const intensity = counts[i] / maxC;
+    const cell = document.createElement('div');
+    cell.className = 'heatmap-cell';
+    cell.style.background = `rgba(0, 212, 255, ${0.06 + intensity * 0.50})`;
+    cell.style.color = intensity > 0.5 ? '#fff' : 'var(--text-secondary)';
+    cell.innerHTML = `<span class="day">${d}</span><span class="count">${counts[i]}</span>`;
+    hm.appendChild(cell);
+  });
+
+  // Busiest times
+  new Chart(document.getElementById('apptTimes'), {
+    type: 'bar',
+    data: {
+      labels: ['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'],
+      datasets: [{
+        data: [12, 34, 41, 38, 22, 18, 29, 35, 44, 38, 21],
+        backgroundColor: ctx => {
+          const v = ctx.parsed?.y || 0;
+          return v >= 34 ? ACCENT : ACCENT3;
+        },
+        borderRadius: 6,
+        borderSkipped: false,
+        barPercentage: 0.65
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // Cancellation reasons
+  new Chart(document.getElementById('apptCancelReasons'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Forgot', 'Work Clash', 'Feeling Better', 'Other'],
+      datasets: [{
+        data: [35, 28, 22, 15],
+        backgroundColor: [RED, AMBER, ACCENT, '#3a3a44'],
+        borderWidth: 0, hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: { legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } } }
+    }
+  });
+}
+
+// ── PATIENTS ──
+function initPatients() {
+  new Chart(document.getElementById('patientSources'), {
+    type: 'bar',
+    data: {
+      labels: ['🔍 Google Search', '🩺 GP Referral', '🔄 Returning Patient', '📱 Social Media', '🚶 Walk-in'],
+      datasets: [{
+        data: [38, 28, 22, 8, 4],
+        backgroundColor: [ACCENT, ACCENT2, ACCENT3, '#005566', '#003844'],
+        borderRadius: 8, borderSkipped: false, barPercentage: 0.55
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
+      },
+      scales: {
+        x: { ticks: { callback: v => v + '%' } }
+      }
+    }
+  });
+}
+
+// ── TREATMENTS ──
+function initTreatments() {
+  // Horizontal bar — Top Injury Types
+  new Chart(document.getElementById('treatInjuries'), {
+    type: 'bar',
+    data: {
+      labels: ['Lower Back Pain','Knee Injury','Sports Rehab','Shoulder Pain','Ankle/Foot','Hip Pain','Post-Surgery','Neck Pain'],
+      datasets: [{
+        data: [67, 54, 48, 31, 27, 22, 20, 18],
+        backgroundColor: [ACCENT, ACCENT, ACCENT2, ACCENT2, ACCENT3, ACCENT3, '#005566', '#005566'],
+        borderRadius: 8, borderSkipped: false, barPercentage: 0.65
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      scales: {
+        x: { beginAtZero: true }
+      }
+    }
+  });
+
+  // Sport split donut
+  new Chart(document.getElementById('treatSportSplit'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Sport-Related', 'Non-Sport'],
+      datasets: [{
+        data: [58, 42],
+        backgroundColor: [ACCENT, '#2a2a34'],
+        borderWidth: 0, hoverOffset: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '72%',
+      plugins: {
+        legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } },
+        tooltip: { callbacks: { label: c => c.parsed + '%' } }
+      }
+    }
+  });
+
+  // Revenue by treatment
+  new Chart(document.getElementById('treatRevenue'), {
+    type: 'bar',
+    data: {
+      labels: ['Sports Rehab','Lower Back','Knee Injury','Shoulder','Post-Surgery','Ankle/Foot','Hip Pain','Neck Pain'],
+      datasets: [{
+        data: [4200, 3850, 3100, 2400, 2100, 1580, 890, 720],
+        backgroundColor: [ACCENT, ACCENT, ACCENT2, ACCENT2, ACCENT3, ACCENT3, '#005566', '#005566'],
+        borderRadius: 8, borderSkipped: false, barPercentage: 0.55
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { ticks: { callback: v => '£' + (v >= 1000 ? (v/1000).toFixed(1) + 'k' : v) } } },
+      plugins: {
+        tooltip: { callbacks: { label: c => '£' + c.parsed.y.toLocaleString() } }
+      }
+    }
+  });
+}
+
+// ── REVIEWS ──
+function initReviews() {
+  // Progress bar animation
+  setTimeout(() => { document.getElementById('reviewProgress').style.width = '80%'; }, 200);
+
+  // Trend
+  new Chart(document.getElementById('reviewTrend'), {
+    type: 'line',
+    data: {
+      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [{
+        data: [3, 4, 5, 6, 7, 8],
+        borderColor: ACCENT,
+        backgroundColor: 'rgba(0,212,255,0.08)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: ACCENT,
+        pointBorderColor: '#0a0a0a',
+        pointBorderWidth: 2,
+        pointHoverRadius: 7
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } } }
+    }
+  });
+}
+
+// ── LEADS ──
+function initLeads() {
+  new Chart(document.getElementById('leadSources'), {
+    type: 'bar',
+    data: {
+      labels: ['Website Form', 'Google Business', 'Phone', 'Social Media'],
+      datasets: [{
+        data: [38, 14, 8, 4],
+        backgroundColor: [ACCENT, ACCENT2, ACCENT3, '#005566'],
+        borderRadius: 8, borderSkipped: false, barPercentage: 0.55
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: false }
+  });
+
+  // Time of day — business vs after hours
+  new Chart(document.getElementById('leadTimes'), {
+    type: 'bar',
+    data: {
+      labels: ['Business Hours (9am–6pm)', 'After Hours (6pm–9am)'],
+      datasets: [{
+        data: [42, 22],
+        backgroundColor: [ACCENT, AMBER],
+        borderRadius: 10, borderSkipped: false, barPercentage: 0.45
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: c => {
+              const pct = c.dataIndex === 0 ? '66%' : '34%';
+              return c.parsed.y + ' enquiries (' + pct + ')';
+            }
+          }
+        }
+      },
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+// Init default tab
+initChartsForTab('overview');
+</script>
+
+</body>
+</html>
