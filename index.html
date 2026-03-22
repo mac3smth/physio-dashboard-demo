@@ -655,7 +655,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Patient Sources</div>
-        <div class="chart-wrap bar"><canvas id="overviewSources"></canvas></div>
+        <div class="chart-wrap bar" style="height:200px;"><canvas id="overviewSources" style="height:200px;"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Top Treatments This Month</div>
@@ -675,7 +675,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Weekly Show / No-Show / Cancelled</div>
-        <div class="chart-wrap bar"><canvas id="apptWeekly"></canvas></div>
+        <div class="chart-wrap bar" style="height:280px;"><canvas id="apptWeekly" style="height:280px;"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Busiest Days</div>
@@ -685,7 +685,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Busiest Times (8am – 6pm)</div>
-        <div class="chart-wrap bar"><canvas id="apptTimes"></canvas></div>
+        <div class="chart-wrap bar" style="height:200px;"><canvas id="apptTimes" style="height:200px;"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Cancellation Reasons</div>
@@ -713,7 +713,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Patient Acquisition Sources</div>
-        <div class="chart-wrap bar"><canvas id="patientSources"></canvas></div>
+        <div class="chart-wrap bar" style="height:220px;"><canvas id="patientSources" style="height:220px;"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Top Referring GPs</div>
@@ -739,7 +739,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Top Injury Types</div>
-        <div class="chart-wrap hbar"><canvas id="treatInjuries"></canvas></div>
+        <div class="chart-wrap hbar" style="height:280px;"><canvas id="treatInjuries" style="height:280px;"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Sport vs Non-Sport Split</div>
@@ -756,7 +756,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Revenue by Treatment Type</div>
-        <div class="chart-wrap bar"><canvas id="treatRevenue"></canvas></div>
+        <div class="chart-wrap bar" style="height:220px;"><canvas id="treatRevenue" style="height:220px;"></canvas></div>
       </div>
       <div class="card mini-stat" style="display:flex;flex-direction:column;justify-content:center;">
         <div class="card-title" style="text-align:center;">Most Improved This Month</div>
@@ -820,11 +820,11 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Enquiries by Source</div>
-        <div class="chart-wrap bar"><canvas id="leadSources"></canvas></div>
+        <div class="chart-wrap bar" style="height:200px;"><canvas id="leadSources" style="height:200px;"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Enquiries by Time of Day</div>
-        <div class="chart-wrap bar"><canvas id="leadTimes"></canvas></div>
+        <div class="chart-wrap bar" style="height:200px;"><canvas id="leadTimes" style="height:200px;"></canvas></div>
         <div style="margin-top:12px;text-align:center;font-size:13px;color:var(--amber);font-weight:600;">34% of enquiries arrive outside business hours</div>
       </div>
     </div>
@@ -886,6 +886,15 @@ function gradient(ctx, c1, c2) {
   return g;
 }
 
+// Safely destroy any existing chart on a canvas before creating a new one
+function safeCreate(canvasId, config) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return null;
+  const existing = Chart.getChart(canvas);
+  if (existing) existing.destroy();
+  return new Chart(canvas, config);
+}
+
 // ── Tabs ──
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -901,26 +910,32 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-// ── Chart Instances Store ──
-const charts = {};
+// ── Chart Init Tracker ──
+const chartsInit = {};
 
 function initChartsForTab(tab) {
-  if (charts[tab]) return;
-  charts[tab] = true;
-  switch(tab) {
-    case 'overview': initOverview(); break;
-    case 'appointments': initAppointments(); break;
-    case 'patients': initPatients(); break;
-    case 'treatments': initTreatments(); break;
-    case 'reviews': initReviews(); break;
-    case 'leads': initLeads(); break;
-  }
+  // Allow re-init for tabs that previously failed (hidden)
+  // but skip if already successfully rendered
+  if (chartsInit[tab]) return;
+  setTimeout(() => {
+    switch(tab) {
+      case 'overview': initOverview(); break;
+      case 'appointments': initAppointments(); break;
+      case 'patients': initPatients(); break;
+      case 'treatments': initTreatments(); break;
+      case 'reviews': initReviews(); break;
+      case 'leads': initLeads(); break;
+    }
+    chartsInit[tab] = true;
+  }, 100);
 }
 
 // ── OVERVIEW ──
 function initOverview() {
   // Revenue trend
   const ctx1 = document.getElementById('overviewRevenue').getContext('2d');
+  const existRev = Chart.getChart(document.getElementById('overviewRevenue'));
+  if (existRev) existRev.destroy();
   new Chart(ctx1, {
     type: 'line',
     data: {
@@ -956,7 +971,7 @@ function initOverview() {
   });
 
   // Donut
-  new Chart(document.getElementById('overviewDonut'), {
+  safeCreate('overviewDonut', {
     type: 'doughnut',
     data: {
       labels: ['Attended', 'No-show', 'Cancelled'],
@@ -977,7 +992,7 @@ function initOverview() {
   });
 
   // Patient sources — horizontal bars
-  new Chart(document.getElementById('overviewSources'), {
+  safeCreate('overviewSources', {
     type: 'bar',
     data: {
       labels: ['Google Search', 'Referral', 'Returning', 'Social Media', 'Walk-in'],
@@ -996,7 +1011,7 @@ function initOverview() {
         tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
       },
       scales: {
-        x: { ticks: { callback: v => v + '%' } }
+        x: { ticks: { callback: v => v + '%' }, beginAtZero: true }
       }
     }
   });
@@ -1004,15 +1019,15 @@ function initOverview() {
 
 // ── APPOINTMENTS ──
 function initAppointments() {
-  // Weekly stacked bar
-  new Chart(document.getElementById('apptWeekly'), {
+  // Weekly stacked bar — FIXED attended values
+  safeCreate('apptWeekly', {
     type: 'bar',
     data: {
       labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
       datasets: [
-        { label: 'Attended', data: [58, 64, 62, 63], backgroundColor: ACCENT, borderRadius: 6, borderSkipped: false },
-        { label: 'No-show', data: [8, 6, 7, 7], backgroundColor: RED, borderRadius: 6, borderSkipped: false },
-        { label: 'Cancelled', data: [4, 2, 3, 3], backgroundColor: '#3a3a44', borderRadius: 6, borderSkipped: false }
+        { label: 'Attended', data: [62, 71, 68, 74], backgroundColor: ACCENT, borderRadius: 6, borderSkipped: false },
+        { label: 'No-show', data: [8, 7, 6, 7], backgroundColor: RED, borderRadius: 6, borderSkipped: false },
+        { label: 'Cancelled', data: [3, 2, 4, 3], backgroundColor: '#3a3a44', borderRadius: 6, borderSkipped: false }
       ]
     },
     options: {
@@ -1020,11 +1035,11 @@ function initAppointments() {
       plugins: {
         legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
       },
-      scales: { x: { stacked: true }, y: { stacked: true } }
+      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
     }
   });
 
-  // Heatmap
+  // Heatmap — colour intensity blocks
   const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   const counts = [45, 92, 78, 88, 52, 35, 12];
   const maxC = Math.max(...counts);
@@ -1034,33 +1049,33 @@ function initAppointments() {
     const intensity = counts[i] / maxC;
     const cell = document.createElement('div');
     cell.className = 'heatmap-cell';
-    cell.style.background = `rgba(0, 212, 255, ${0.06 + intensity * 0.50})`;
+    cell.style.background = `rgba(0, 212, 255, ${0.06 + intensity * 0.55})`;
     cell.style.color = intensity > 0.5 ? '#fff' : 'var(--text-secondary)';
     cell.innerHTML = `<span class="day">${d}</span><span class="count">${counts[i]}</span>`;
     hm.appendChild(cell);
   });
 
-  // Busiest times
-  new Chart(document.getElementById('apptTimes'), {
+  // Busiest times — force render bar chart
+  safeCreate('apptTimes', {
     type: 'bar',
     data: {
       labels: ['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'],
       datasets: [{
         data: [12, 34, 41, 38, 22, 18, 29, 35, 44, 38, 21],
-        backgroundColor: ctx => {
-          const v = ctx.parsed?.y || 0;
-          return v >= 34 ? ACCENT : ACCENT3;
-        },
+        backgroundColor: [ACCENT3, ACCENT, ACCENT, ACCENT, ACCENT3, ACCENT3, ACCENT3, ACCENT, ACCENT, ACCENT, ACCENT3],
         borderRadius: 6,
         borderSkipped: false,
         barPercentage: 0.65
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
+    }
   });
 
   // Cancellation reasons
-  new Chart(document.getElementById('apptCancelReasons'), {
+  safeCreate('apptCancelReasons', {
     type: 'doughnut',
     data: {
       labels: ['Forgot', 'Work Clash', 'Feeling Better', 'Other'],
@@ -1080,7 +1095,7 @@ function initAppointments() {
 
 // ── PATIENTS ──
 function initPatients() {
-  new Chart(document.getElementById('patientSources'), {
+  safeCreate('patientSources', {
     type: 'bar',
     data: {
       labels: ['🔍 Google Search', '🩺 GP Referral', '🔄 Returning Patient', '📱 Social Media', '🚶 Walk-in'],
@@ -1097,7 +1112,7 @@ function initPatients() {
         tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
       },
       scales: {
-        x: { ticks: { callback: v => v + '%' } }
+        x: { ticks: { callback: v => v + '%' }, beginAtZero: true }
       }
     }
   });
@@ -1106,7 +1121,7 @@ function initPatients() {
 // ── TREATMENTS ──
 function initTreatments() {
   // Horizontal bar — Top Injury Types
-  new Chart(document.getElementById('treatInjuries'), {
+  safeCreate('treatInjuries', {
     type: 'bar',
     data: {
       labels: ['Lower Back Pain','Knee Injury','Sports Rehab','Shoulder Pain','Ankle/Foot','Hip Pain','Post-Surgery','Neck Pain'],
@@ -1126,7 +1141,7 @@ function initTreatments() {
   });
 
   // Sport split donut
-  new Chart(document.getElementById('treatSportSplit'), {
+  safeCreate('treatSportSplit', {
     type: 'doughnut',
     data: {
       labels: ['Sport-Related', 'Non-Sport'],
@@ -1147,7 +1162,7 @@ function initTreatments() {
   });
 
   // Revenue by treatment
-  new Chart(document.getElementById('treatRevenue'), {
+  safeCreate('treatRevenue', {
     type: 'bar',
     data: {
       labels: ['Sports Rehab','Lower Back','Knee Injury','Shoulder','Post-Surgery','Ankle/Foot','Hip Pain','Neck Pain'],
@@ -1159,7 +1174,7 @@ function initTreatments() {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      scales: { y: { ticks: { callback: v => '£' + (v >= 1000 ? (v/1000).toFixed(1) + 'k' : v) } } },
+      scales: { y: { ticks: { callback: v => '£' + (v >= 1000 ? (v/1000).toFixed(1) + 'k' : v) }, beginAtZero: true } },
       plugins: {
         tooltip: { callbacks: { label: c => '£' + c.parsed.y.toLocaleString() } }
       }
@@ -1173,7 +1188,7 @@ function initReviews() {
   setTimeout(() => { document.getElementById('reviewProgress').style.width = '80%'; }, 200);
 
   // Trend
-  new Chart(document.getElementById('reviewTrend'), {
+  safeCreate('reviewTrend', {
     type: 'line',
     data: {
       labels: ['Jan','Feb','Mar','Apr','May','Jun'],
@@ -1200,7 +1215,7 @@ function initReviews() {
 
 // ── LEADS ──
 function initLeads() {
-  new Chart(document.getElementById('leadSources'), {
+  safeCreate('leadSources', {
     type: 'bar',
     data: {
       labels: ['Website Form', 'Google Business', 'Phone', 'Social Media'],
@@ -1210,11 +1225,14 @@ function initLeads() {
         borderRadius: 8, borderSkipped: false, barPercentage: 0.55
       }]
     },
-    options: { responsive: true, maintainAspectRatio: false }
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: { y: { beginAtZero: true } }
+    }
   });
 
   // Time of day — business vs after hours
-  new Chart(document.getElementById('leadTimes'), {
+  safeCreate('leadTimes', {
     type: 'bar',
     data: {
       labels: ['Business Hours (9am–6pm)', 'After Hours (6pm–9am)'],
