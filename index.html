@@ -212,7 +212,9 @@ body {
   animation: fadeIn 0.35s ease;
 }
 
-.tab-content.active { display: block; }
+.tab-content.active {
+  display: block;
+}
 
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(6px); }
@@ -645,17 +647,17 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Revenue Trend (6 Months)</div>
-        <div class="chart-wrap line"><canvas id="overviewRevenue"></canvas></div>
+        <div class="chart-wrap line"><canvas id="chartOverviewRevenue" height="260"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Appointment Outcomes</div>
-        <div class="chart-wrap donut"><canvas id="overviewDonut"></canvas></div>
+        <div class="chart-wrap donut"><canvas id="chartOverviewDonut" height="240"></canvas></div>
       </div>
     </div>
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Patient Sources</div>
-        <div class="chart-wrap bar" style="height:200px;"><canvas id="overviewSources" style="height:200px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartOverviewSources" height="200"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Top Treatments This Month</div>
@@ -675,7 +677,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Weekly Show / No-Show / Cancelled</div>
-        <div class="chart-wrap bar" style="height:280px;"><canvas id="apptWeekly" style="height:280px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartApptWeekly" height="280"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Busiest Days</div>
@@ -685,11 +687,11 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Busiest Times (8am – 6pm)</div>
-        <div class="chart-wrap bar" style="height:200px;"><canvas id="apptTimes" style="height:200px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartApptTimes" height="200"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Cancellation Reasons</div>
-        <div class="chart-wrap donut"><canvas id="apptCancelReasons"></canvas></div>
+        <div class="chart-wrap donut"><canvas id="chartApptCancelReasons" height="240"></canvas></div>
       </div>
     </div>
     <div class="grid-3">
@@ -713,7 +715,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Patient Acquisition Sources</div>
-        <div class="chart-wrap bar" style="height:220px;"><canvas id="patientSources" style="height:220px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartPatientSources" height="220"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Top Referring GPs</div>
@@ -739,11 +741,11 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Top Injury Types</div>
-        <div class="chart-wrap hbar" style="height:280px;"><canvas id="treatInjuries" style="height:280px;"></canvas></div>
+        <div class="chart-wrap hbar"><canvas id="chartTreatInjuries" height="280"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Sport vs Non-Sport Split</div>
-        <div class="chart-wrap donut"><canvas id="treatSportSplit"></canvas></div>
+        <div class="chart-wrap donut"><canvas id="chartTreatSportSplit" height="240"></canvas></div>
         <div style="margin-top:24px;">
           <div class="card-title">Avg Sessions per Injury Type</div>
           <div class="stat-row"><div class="stat-label">Lower Back Pain</div><div class="stat-value">5.2</div></div>
@@ -756,7 +758,7 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Revenue by Treatment Type</div>
-        <div class="chart-wrap bar" style="height:220px;"><canvas id="treatRevenue" style="height:220px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartTreatRevenue" height="220"></canvas></div>
       </div>
       <div class="card mini-stat" style="display:flex;flex-direction:column;justify-content:center;">
         <div class="card-title" style="text-align:center;">Most Improved This Month</div>
@@ -780,7 +782,7 @@ body {
       </div>
       <div class="card">
         <div class="card-title">Review Trend (6 Months)</div>
-        <div class="chart-wrap line"><canvas id="reviewTrend"></canvas></div>
+        <div class="chart-wrap line"><canvas id="chartReviewTrend" height="260"></canvas></div>
       </div>
     </div>
     <div class="grid-3" style="margin-top:16px;">
@@ -820,11 +822,11 @@ body {
     <div class="grid-2">
       <div class="card">
         <div class="card-title">Enquiries by Source</div>
-        <div class="chart-wrap bar" style="height:200px;"><canvas id="leadSources" style="height:200px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartLeadSources" height="200"></canvas></div>
       </div>
       <div class="card">
         <div class="card-title">Enquiries by Time of Day</div>
-        <div class="chart-wrap bar" style="height:200px;"><canvas id="leadTimes" style="height:200px;"></canvas></div>
+        <div class="chart-wrap bar"><canvas id="chartLeadTimes" height="200"></canvas></div>
         <div style="margin-top:12px;text-align:center;font-size:13px;color:var(--amber);font-weight:600;">34% of enquiries arrive outside business hours</div>
       </div>
     </div>
@@ -856,411 +858,267 @@ body {
 </div>
 
 <script>
-// ── Globals ──
-Chart.defaults.color = '#8b8b96';
-Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.font.size = 12;
-Chart.defaults.plugins.legend.display = false;
-Chart.defaults.plugins.tooltip.backgroundColor = '#1a1a22';
-Chart.defaults.plugins.tooltip.titleColor = '#f0f0f2';
-Chart.defaults.plugins.tooltip.bodyColor = '#f0f0f2';
-Chart.defaults.plugins.tooltip.borderColor = '#2a2a32';
-Chart.defaults.plugins.tooltip.borderWidth = 1;
-Chart.defaults.plugins.tooltip.cornerRadius = 10;
-Chart.defaults.plugins.tooltip.padding = 12;
-Chart.defaults.plugins.tooltip.displayColors = false;
-Chart.defaults.scale.grid = { color: 'rgba(255,255,255,0.04)', drawBorder: false };
-Chart.defaults.scale.border = { display: false };
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('=== DASHBOARD INIT START ===');
 
-const ACCENT = '#00D4FF';
-const ACCENT2 = '#0098b8';
-const ACCENT3 = '#006a82';
-const GREEN = '#34d399';
-const RED = '#f87171';
-const AMBER = '#fbbf24';
+  // ── Chart.js Global Defaults ──
+  Chart.defaults.color = '#8b8b96';
+  Chart.defaults.font.family = "'Inter', sans-serif";
+  Chart.defaults.font.size = 12;
+  Chart.defaults.plugins.legend.display = false;
+  Chart.defaults.plugins.tooltip.backgroundColor = '#1a1a22';
+  Chart.defaults.plugins.tooltip.titleColor = '#f0f0f2';
+  Chart.defaults.plugins.tooltip.bodyColor = '#f0f0f2';
+  Chart.defaults.plugins.tooltip.borderColor = '#2a2a32';
+  Chart.defaults.plugins.tooltip.borderWidth = 1;
+  Chart.defaults.plugins.tooltip.cornerRadius = 10;
+  Chart.defaults.plugins.tooltip.padding = 12;
+  Chart.defaults.plugins.tooltip.displayColors = false;
+  Chart.defaults.scale.grid = { color: 'rgba(255,255,255,0.04)', drawBorder: false };
+  Chart.defaults.scale.border = { display: false };
 
-function gradient(ctx, c1, c2) {
-  const g = ctx.createLinearGradient(0, 0, 0, 280);
-  g.addColorStop(0, c1);
-  g.addColorStop(1, c2);
-  return g;
-}
+  var ACCENT = '#00D4FF';
+  var ACCENT2 = '#0098b8';
+  var ACCENT3 = '#006a82';
+  var RED = '#f87171';
+  var AMBER = '#fbbf24';
 
-// Safely destroy any existing chart on a canvas before creating a new one
-function safeCreate(canvasId, config) {
-  const canvas = document.getElementById(canvasId);
-  if (!canvas) return null;
-  const existing = Chart.getChart(canvas);
-  if (existing) existing.destroy();
-  return new Chart(canvas, config);
-}
+  // Track which tabs have been initialized
+  var tabsDone = {};
 
-// ── Tabs ──
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    btn.classList.add('active');
-    const panel = document.getElementById('tab-' + btn.dataset.tab);
-    panel.classList.add('active');
-    panel.style.animation = 'none';
-    panel.offsetHeight;
-    panel.style.animation = '';
-    initChartsForTab(btn.dataset.tab);
+  // Helper: destroy existing chart then create new one
+  function makeChart(canvasId, config) {
+    try {
+      var existing = Chart.getChart(canvasId);
+      if (existing) existing.destroy();
+    } catch(e) {}
+    return new Chart(document.getElementById(canvasId), config);
+  }
+
+  // ══════════════════════════════════════════════
+  // OVERVIEW — init immediately (tab is visible on load)
+  // ══════════════════════════════════════════════
+  function initOverview() {
+    try {
+      console.log('[CHART] chartOverviewRevenue — BEFORE');
+      var ctx1 = document.getElementById('chartOverviewRevenue').getContext('2d');
+      var grad1 = ctx1.createLinearGradient(0, 0, 0, 260);
+      grad1.addColorStop(0, 'rgba(0,212,255,0.15)');
+      grad1.addColorStop(1, 'rgba(0,212,255,0)');
+      makeChart('chartOverviewRevenue', {
+        type: 'line',
+        data: { labels: ['Jan','Feb','Mar','Apr','May','Jun'], datasets: [{ data: [12400,13800,14200,15900,16800,18420], borderColor: ACCENT, backgroundColor: grad1, fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: ACCENT, pointBorderColor: '#0a0a0a', pointBorderWidth: 2, pointHoverRadius: 7 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { return '£' + c.parsed.y.toLocaleString(); } } } }, scales: { y: { ticks: { callback: function(v) { return '£' + (v/1000) + 'k'; } }, beginAtZero: false } } }
+      });
+      console.log('[CHART] chartOverviewRevenue — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartOverviewRevenue:', e); }
+
+    try {
+      console.log('[CHART] chartOverviewDonut — BEFORE');
+      makeChart('chartOverviewDonut', {
+        type: 'doughnut',
+        data: { labels: ['Attended','No-show','Cancelled'], datasets: [{ data: [247,28,12], backgroundColor: [ACCENT,RED,'#3a3a44'], borderWidth: 0, hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } } } }
+      });
+      console.log('[CHART] chartOverviewDonut — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartOverviewDonut:', e); }
+
+    try {
+      console.log('[CHART] chartOverviewSources — BEFORE');
+      makeChart('chartOverviewSources', {
+        type: 'bar',
+        data: { labels: ['Google Search','Referral','Returning','Social Media','Walk-in'], datasets: [{ data: [38,28,22,8,4], backgroundColor: [ACCENT,ACCENT2,ACCENT3,'#005566','#003844'], borderRadius: 8, borderSkipped: false, barPercentage: 0.6 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { tooltip: { callbacks: { label: function(c) { return c.parsed.x + '%'; } } } }, scales: { x: { ticks: { callback: function(v) { return v + '%'; } }, beginAtZero: true } } }
+      });
+      console.log('[CHART] chartOverviewSources — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartOverviewSources:', e); }
+  }
+
+  // ══════════════════════════════════════════════
+  // APPOINTMENTS
+  // ══════════════════════════════════════════════
+  function initAppointments() {
+    try {
+      console.log('[CHART] chartApptWeekly — BEFORE');
+      makeChart('chartApptWeekly', {
+        type: 'bar',
+        data: { labels: ['Week 1','Week 2','Week 3','Week 4'], datasets: [
+          { label: 'Attended', data: [62,71,68,74], backgroundColor: ACCENT, borderRadius: 6, borderSkipped: false },
+          { label: 'No-show', data: [8,7,6,7], backgroundColor: RED, borderRadius: 6, borderSkipped: false },
+          { label: 'Cancelled', data: [3,2,4,3], backgroundColor: '#3a3a44', borderRadius: 6, borderSkipped: false }
+        ] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } } }, scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+      });
+      console.log('[CHART] chartApptWeekly — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartApptWeekly:', e); }
+
+    try {
+      console.log('[HEATMAP] heatmap — BEFORE');
+      var days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      var counts = [45,92,78,88,52,35,12];
+      var hm = document.getElementById('heatmap');
+      hm.innerHTML = '';
+      days.forEach(function(d, i) {
+        var intensity = counts[i] / 92;
+        var cell = document.createElement('div');
+        cell.className = 'heatmap-cell';
+        cell.style.background = 'rgba(0,212,255,' + (0.06 + intensity * 0.55) + ')';
+        cell.style.color = intensity > 0.5 ? '#fff' : '#8b8b96';
+        cell.innerHTML = '<span class="day">' + d + '</span><span class="count">' + counts[i] + '</span>';
+        hm.appendChild(cell);
+      });
+      console.log('[HEATMAP] heatmap — DONE');
+    } catch(e) { console.error('[HEATMAP ERROR]:', e); }
+
+    try {
+      console.log('[CHART] chartApptTimes — BEFORE');
+      makeChart('chartApptTimes', {
+        type: 'bar',
+        data: { labels: ['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'], datasets: [{ data: [12,34,41,38,22,18,29,35,44,38,21], backgroundColor: [ACCENT3,ACCENT,ACCENT,ACCENT,ACCENT3,ACCENT3,ACCENT3,ACCENT,ACCENT,ACCENT,ACCENT3], borderRadius: 6, borderSkipped: false, barPercentage: 0.65 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+      });
+      console.log('[CHART] chartApptTimes — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartApptTimes:', e); }
+
+    try {
+      console.log('[CHART] chartApptCancelReasons — BEFORE');
+      makeChart('chartApptCancelReasons', {
+        type: 'doughnut',
+        data: { labels: ['Forgot','Work Clash','Feeling Better','Other'], datasets: [{ data: [35,28,22,15], backgroundColor: [RED,AMBER,ACCENT,'#3a3a44'], borderWidth: 0, hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } } } }
+      });
+      console.log('[CHART] chartApptCancelReasons — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartApptCancelReasons:', e); }
+  }
+
+  // ══════════════════════════════════════════════
+  // PATIENTS
+  // ══════════════════════════════════════════════
+  function initPatients() {
+    try {
+      console.log('[CHART] chartPatientSources — BEFORE');
+      makeChart('chartPatientSources', {
+        type: 'bar',
+        data: { labels: ['🔍 Google Search','🩺 GP Referral','🔄 Returning Patient','📱 Social Media','🚶 Walk-in'], datasets: [{ data: [38,28,22,8,4], backgroundColor: [ACCENT,ACCENT2,ACCENT3,'#005566','#003844'], borderRadius: 8, borderSkipped: false, barPercentage: 0.55 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { tooltip: { callbacks: { label: function(c) { return c.parsed.x + '%'; } } } }, scales: { x: { ticks: { callback: function(v) { return v + '%'; } }, beginAtZero: true } } }
+      });
+      console.log('[CHART] chartPatientSources — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartPatientSources:', e); }
+  }
+
+  // ══════════════════════════════════════════════
+  // TREATMENTS
+  // ══════════════════════════════════════════════
+  function initTreatments() {
+    try {
+      console.log('[CHART] chartTreatInjuries — BEFORE');
+      makeChart('chartTreatInjuries', {
+        type: 'bar',
+        data: { labels: ['Lower Back Pain','Knee Injury','Sports Rehab','Shoulder Pain','Ankle/Foot','Hip Pain','Post-Surgery','Neck Pain'], datasets: [{ data: [67,54,48,31,27,22,20,18], backgroundColor: [ACCENT,ACCENT,ACCENT2,ACCENT2,ACCENT3,ACCENT3,'#005566','#005566'], borderRadius: 8, borderSkipped: false, barPercentage: 0.65 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', scales: { x: { beginAtZero: true } } }
+      });
+      console.log('[CHART] chartTreatInjuries — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartTreatInjuries:', e); }
+
+    try {
+      console.log('[CHART] chartTreatSportSplit — BEFORE');
+      makeChart('chartTreatSportSplit', {
+        type: 'doughnut',
+        data: { labels: ['Sport-Related','Non-Sport'], datasets: [{ data: [58,42], backgroundColor: [ACCENT,'#2a2a34'], borderWidth: 0, hoverOffset: 6 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }, tooltip: { callbacks: { label: function(c) { return c.parsed + '%'; } } } } }
+      });
+      console.log('[CHART] chartTreatSportSplit — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartTreatSportSplit:', e); }
+
+    try {
+      console.log('[CHART] chartTreatRevenue — BEFORE');
+      makeChart('chartTreatRevenue', {
+        type: 'bar',
+        data: { labels: ['Sports Rehab','Lower Back','Knee Injury','Shoulder','Post-Surgery','Ankle/Foot','Hip Pain','Neck Pain'], datasets: [{ data: [4200,3850,3100,2400,2100,1580,890,720], backgroundColor: [ACCENT,ACCENT,ACCENT2,ACCENT2,ACCENT3,ACCENT3,'#005566','#005566'], borderRadius: 8, borderSkipped: false, barPercentage: 0.55 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { callback: function(v) { return '£' + (v >= 1000 ? (v/1000).toFixed(1) + 'k' : v); } }, beginAtZero: true } }, plugins: { tooltip: { callbacks: { label: function(c) { return '£' + c.parsed.y.toLocaleString(); } } } } }
+      });
+      console.log('[CHART] chartTreatRevenue — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartTreatRevenue:', e); }
+  }
+
+  // ══════════════════════════════════════════════
+  // REVIEWS
+  // ══════════════════════════════════════════════
+  function initReviews() {
+    setTimeout(function() { document.getElementById('reviewProgress').style.width = '80%'; }, 200);
+
+    try {
+      console.log('[CHART] chartReviewTrend — BEFORE');
+      makeChart('chartReviewTrend', {
+        type: 'line',
+        data: { labels: ['Jan','Feb','Mar','Apr','May','Jun'], datasets: [{ data: [3,4,5,6,7,8], borderColor: ACCENT, backgroundColor: 'rgba(0,212,255,0.08)', fill: true, tension: 0.4, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: ACCENT, pointBorderColor: '#0a0a0a', pointBorderWidth: 2, pointHoverRadius: 7 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } } } }
+      });
+      console.log('[CHART] chartReviewTrend — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartReviewTrend:', e); }
+  }
+
+  // ══════════════════════════════════════════════
+  // LEADS
+  // ══════════════════════════════════════════════
+  function initLeads() {
+    try {
+      console.log('[CHART] chartLeadSources — BEFORE');
+      makeChart('chartLeadSources', {
+        type: 'bar',
+        data: { labels: ['Website Form','Google Business','Phone','Social Media'], datasets: [{ data: [38,14,8,4], backgroundColor: [ACCENT,ACCENT2,ACCENT3,'#005566'], borderRadius: 8, borderSkipped: false, barPercentage: 0.55 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+      });
+      console.log('[CHART] chartLeadSources — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartLeadSources:', e); }
+
+    try {
+      console.log('[CHART] chartLeadTimes — BEFORE');
+      makeChart('chartLeadTimes', {
+        type: 'bar',
+        data: { labels: ['Business Hours (9am–6pm)','After Hours (6pm–9am)'], datasets: [{ data: [42,22], backgroundColor: [ACCENT,AMBER], borderRadius: 10, borderSkipped: false, barPercentage: 0.45 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: function(c) { var pct = c.dataIndex === 0 ? '66%' : '34%'; return c.parsed.y + ' enquiries (' + pct + ')'; } } } }, scales: { y: { beginAtZero: true } } }
+      });
+      console.log('[CHART] chartLeadTimes — DONE');
+    } catch(e) { console.error('[CHART ERROR] chartLeadTimes:', e); }
+  }
+
+  // ── Tab switching with lazy chart init ──
+  function initTab(tabName) {
+    if (tabsDone[tabName]) return;
+    tabsDone[tabName] = true;
+    // Use setTimeout to ensure DOM is painted and canvas is measurable
+    setTimeout(function() {
+      switch(tabName) {
+        case 'overview': initOverview(); break;
+        case 'appointments': initAppointments(); break;
+        case 'patients': initPatients(); break;
+        case 'treatments': initTreatments(); break;
+        case 'reviews': initReviews(); break;
+        case 'leads': initLeads(); break;
+      }
+    }, 100);
+  }
+
+  document.querySelectorAll('.tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+      btn.classList.add('active');
+      var panel = document.getElementById('tab-' + btn.dataset.tab);
+      panel.classList.add('active');
+      panel.style.animation = 'none';
+      panel.offsetHeight;
+      panel.style.animation = '';
+      initTab(btn.dataset.tab);
+    });
   });
+
+  // Init overview immediately (it's the default active tab)
+  initTab('overview');
+
+  console.log('=== DASHBOARD INIT COMPLETE ===');
 });
-
-// ── Chart Init Tracker ──
-const chartsInit = {};
-
-function initChartsForTab(tab) {
-  // Allow re-init for tabs that previously failed (hidden)
-  // but skip if already successfully rendered
-  if (chartsInit[tab]) return;
-  setTimeout(() => {
-    switch(tab) {
-      case 'overview': initOverview(); break;
-      case 'appointments': initAppointments(); break;
-      case 'patients': initPatients(); break;
-      case 'treatments': initTreatments(); break;
-      case 'reviews': initReviews(); break;
-      case 'leads': initLeads(); break;
-    }
-    chartsInit[tab] = true;
-  }, 100);
-}
-
-// ── OVERVIEW ──
-function initOverview() {
-  // Revenue trend
-  const ctx1 = document.getElementById('overviewRevenue').getContext('2d');
-  const existRev = Chart.getChart(document.getElementById('overviewRevenue'));
-  if (existRev) existRev.destroy();
-  new Chart(ctx1, {
-    type: 'line',
-    data: {
-      labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-      datasets: [{
-        data: [12400, 13800, 14200, 15900, 16800, 18420],
-        borderColor: ACCENT,
-        backgroundColor: gradient(ctx1, 'rgba(0,212,255,0.15)', 'rgba(0,212,255,0)'),
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2.5,
-        pointRadius: 4,
-        pointBackgroundColor: ACCENT,
-        pointBorderColor: '#0a0a0a',
-        pointBorderWidth: 2,
-        pointHoverRadius: 7
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        tooltip: {
-          callbacks: { label: c => '£' + c.parsed.y.toLocaleString() }
-        }
-      },
-      scales: {
-        y: {
-          ticks: { callback: v => '£' + (v/1000) + 'k' },
-          beginAtZero: false
-        }
-      }
-    }
-  });
-
-  // Donut
-  safeCreate('overviewDonut', {
-    type: 'doughnut',
-    data: {
-      labels: ['Attended', 'No-show', 'Cancelled'],
-      datasets: [{
-        data: [247, 28, 12],
-        backgroundColor: [ACCENT, RED, '#3a3a44'],
-        borderWidth: 0,
-        hoverOffset: 6
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '72%',
-      plugins: {
-        legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
-      }
-    }
-  });
-
-  // Patient sources — horizontal bars
-  safeCreate('overviewSources', {
-    type: 'bar',
-    data: {
-      labels: ['Google Search', 'Referral', 'Returning', 'Social Media', 'Walk-in'],
-      datasets: [{
-        data: [38, 28, 22, 8, 4],
-        backgroundColor: [ACCENT, ACCENT2, ACCENT3, '#005566', '#003844'],
-        borderRadius: 8,
-        borderSkipped: false,
-        barPercentage: 0.6
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      indexAxis: 'y',
-      plugins: {
-        tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
-      },
-      scales: {
-        x: { ticks: { callback: v => v + '%' }, beginAtZero: true }
-      }
-    }
-  });
-}
-
-// ── APPOINTMENTS ──
-function initAppointments() {
-  // Weekly stacked bar — FIXED attended values
-  safeCreate('apptWeekly', {
-    type: 'bar',
-    data: {
-      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-      datasets: [
-        { label: 'Attended', data: [62, 71, 68, 74], backgroundColor: ACCENT, borderRadius: 6, borderSkipped: false },
-        { label: 'No-show', data: [8, 7, 6, 7], backgroundColor: RED, borderRadius: 6, borderSkipped: false },
-        { label: 'Cancelled', data: [3, 2, 4, 3], backgroundColor: '#3a3a44', borderRadius: 6, borderSkipped: false }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } }
-      },
-      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
-    }
-  });
-
-  // Heatmap — colour intensity blocks
-  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const counts = [45, 92, 78, 88, 52, 35, 12];
-  const maxC = Math.max(...counts);
-  const hm = document.getElementById('heatmap');
-  hm.innerHTML = '';
-  days.forEach((d, i) => {
-    const intensity = counts[i] / maxC;
-    const cell = document.createElement('div');
-    cell.className = 'heatmap-cell';
-    cell.style.background = `rgba(0, 212, 255, ${0.06 + intensity * 0.55})`;
-    cell.style.color = intensity > 0.5 ? '#fff' : 'var(--text-secondary)';
-    cell.innerHTML = `<span class="day">${d}</span><span class="count">${counts[i]}</span>`;
-    hm.appendChild(cell);
-  });
-
-  // Busiest times — force render bar chart
-  safeCreate('apptTimes', {
-    type: 'bar',
-    data: {
-      labels: ['8am','9am','10am','11am','12pm','1pm','2pm','3pm','4pm','5pm','6pm'],
-      datasets: [{
-        data: [12, 34, 41, 38, 22, 18, 29, 35, 44, 38, 21],
-        backgroundColor: [ACCENT3, ACCENT, ACCENT, ACCENT, ACCENT3, ACCENT3, ACCENT3, ACCENT, ACCENT, ACCENT, ACCENT3],
-        borderRadius: 6,
-        borderSkipped: false,
-        barPercentage: 0.65
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-
-  // Cancellation reasons
-  safeCreate('apptCancelReasons', {
-    type: 'doughnut',
-    data: {
-      labels: ['Forgot', 'Work Clash', 'Feeling Better', 'Other'],
-      datasets: [{
-        data: [35, 28, 22, 15],
-        backgroundColor: [RED, AMBER, ACCENT, '#3a3a44'],
-        borderWidth: 0, hoverOffset: 6
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '72%',
-      plugins: { legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } } }
-    }
-  });
-}
-
-// ── PATIENTS ──
-function initPatients() {
-  safeCreate('patientSources', {
-    type: 'bar',
-    data: {
-      labels: ['🔍 Google Search', '🩺 GP Referral', '🔄 Returning Patient', '📱 Social Media', '🚶 Walk-in'],
-      datasets: [{
-        data: [38, 28, 22, 8, 4],
-        backgroundColor: [ACCENT, ACCENT2, ACCENT3, '#005566', '#003844'],
-        borderRadius: 8, borderSkipped: false, barPercentage: 0.55
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      indexAxis: 'y',
-      plugins: {
-        tooltip: { callbacks: { label: c => c.parsed.x + '%' } }
-      },
-      scales: {
-        x: { ticks: { callback: v => v + '%' }, beginAtZero: true }
-      }
-    }
-  });
-}
-
-// ── TREATMENTS ──
-function initTreatments() {
-  // Horizontal bar — Top Injury Types
-  safeCreate('treatInjuries', {
-    type: 'bar',
-    data: {
-      labels: ['Lower Back Pain','Knee Injury','Sports Rehab','Shoulder Pain','Ankle/Foot','Hip Pain','Post-Surgery','Neck Pain'],
-      datasets: [{
-        data: [67, 54, 48, 31, 27, 22, 20, 18],
-        backgroundColor: [ACCENT, ACCENT, ACCENT2, ACCENT2, ACCENT3, ACCENT3, '#005566', '#005566'],
-        borderRadius: 8, borderSkipped: false, barPercentage: 0.65
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      indexAxis: 'y',
-      scales: {
-        x: { beginAtZero: true }
-      }
-    }
-  });
-
-  // Sport split donut
-  safeCreate('treatSportSplit', {
-    type: 'doughnut',
-    data: {
-      labels: ['Sport-Related', 'Non-Sport'],
-      datasets: [{
-        data: [58, 42],
-        backgroundColor: [ACCENT, '#2a2a34'],
-        borderWidth: 0, hoverOffset: 6
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      cutout: '72%',
-      plugins: {
-        legend: { display: true, position: 'bottom', labels: { padding: 16, usePointStyle: true, pointStyle: 'circle' } },
-        tooltip: { callbacks: { label: c => c.parsed + '%' } }
-      }
-    }
-  });
-
-  // Revenue by treatment
-  safeCreate('treatRevenue', {
-    type: 'bar',
-    data: {
-      labels: ['Sports Rehab','Lower Back','Knee Injury','Shoulder','Post-Surgery','Ankle/Foot','Hip Pain','Neck Pain'],
-      datasets: [{
-        data: [4200, 3850, 3100, 2400, 2100, 1580, 890, 720],
-        backgroundColor: [ACCENT, ACCENT, ACCENT2, ACCENT2, ACCENT3, ACCENT3, '#005566', '#005566'],
-        borderRadius: 8, borderSkipped: false, barPercentage: 0.55
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: { y: { ticks: { callback: v => '£' + (v >= 1000 ? (v/1000).toFixed(1) + 'k' : v) }, beginAtZero: true } },
-      plugins: {
-        tooltip: { callbacks: { label: c => '£' + c.parsed.y.toLocaleString() } }
-      }
-    }
-  });
-}
-
-// ── REVIEWS ──
-function initReviews() {
-  // Progress bar animation
-  setTimeout(() => { document.getElementById('reviewProgress').style.width = '80%'; }, 200);
-
-  // Trend
-  safeCreate('reviewTrend', {
-    type: 'line',
-    data: {
-      labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-      datasets: [{
-        data: [3, 4, 5, 6, 7, 8],
-        borderColor: ACCENT,
-        backgroundColor: 'rgba(0,212,255,0.08)',
-        fill: true,
-        tension: 0.4,
-        borderWidth: 2.5,
-        pointRadius: 5,
-        pointBackgroundColor: ACCENT,
-        pointBorderColor: '#0a0a0a',
-        pointBorderWidth: 2,
-        pointHoverRadius: 7
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true, ticks: { stepSize: 2 } } }
-    }
-  });
-}
-
-// ── LEADS ──
-function initLeads() {
-  safeCreate('leadSources', {
-    type: 'bar',
-    data: {
-      labels: ['Website Form', 'Google Business', 'Phone', 'Social Media'],
-      datasets: [{
-        data: [38, 14, 8, 4],
-        backgroundColor: [ACCENT, ACCENT2, ACCENT3, '#005566'],
-        borderRadius: 8, borderSkipped: false, barPercentage: 0.55
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-
-  // Time of day — business vs after hours
-  safeCreate('leadTimes', {
-    type: 'bar',
-    data: {
-      labels: ['Business Hours (9am–6pm)', 'After Hours (6pm–9am)'],
-      datasets: [{
-        data: [42, 22],
-        backgroundColor: [ACCENT, AMBER],
-        borderRadius: 10, borderSkipped: false, barPercentage: 0.45
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        tooltip: {
-          callbacks: {
-            label: c => {
-              const pct = c.dataIndex === 0 ? '66%' : '34%';
-              return c.parsed.y + ' enquiries (' + pct + ')';
-            }
-          }
-        }
-      },
-      scales: { y: { beginAtZero: true } }
-    }
-  });
-}
-
-// Init default tab
-initChartsForTab('overview');
 </script>
 
 </body>
